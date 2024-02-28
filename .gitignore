@@ -1,0 +1,8 @@
+# dependencies
+/node_modules
+
+# default base files
+README.md
+
+# misc
+/.env
