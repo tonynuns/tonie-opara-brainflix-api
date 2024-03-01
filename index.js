@@ -1,9 +1,38 @@
 const express = require("express");
 const app = express();
+const cors = require("cors");
+const path = require("path");
+
+const videoRoutes = require("./routes/videos");
 
 require("dotenv").config();
-const PORT = process.env.PORT;
+const { PORT, API_KEY } = process.env;
+
+app.use(cors());
+app.use(express.json());
+app.use(express.static(path.join(__dirname, "public")));
+
+// check that POST requests are sent in with JSON headers
+app.use((req, res, next) => {
+	if (
+		req.method === "POST" &&
+		req.headers["content-type"] !== "application/json"
+	) {
+		return res.status(400).send("Post requests require JSON headers");
+	}
+	next();
+});
+
+// check that a valid API key is provided with the api request
+app.use((req, res, next) => {
+	if (req.query.api_key !== API_KEY) {
+		return res.status(401).send("You must provide a valid API key");
+	}
+	next();
+});
+
+app.use("/videos", videoRoutes);
 
 app.listen(PORT, () => {
-	console.log(`Server is listening on port ${PORT}`);
+	console.log(`listening on port ${PORT}`);
 });
