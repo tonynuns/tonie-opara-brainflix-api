@@ -3,18 +3,30 @@ const router = express.Router();
 const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
 
+require("dotenv").config();
+const { PORT, BASE_URL } = process.env;
+
 const readVideoData = () => {
 	const videoData = fs.readFileSync("./data/videos.json");
 	const parsedData = JSON.parse(videoData);
 	return parsedData;
 };
 
+const setVideoDataFileUrl = (array) => {
+	array.forEach((element) => {
+		element.image = `${BASE_URL}:${PORT}${element.image}`;
+		element.video = `${BASE_URL}:${PORT}${element.video}`;
+	});
+	return array;
+};
+
 router
 	.route("/")
 	.get((req, res) => {
-		const videos = readVideoData();
+		let videosArr = readVideoData();
+		videosArr = setVideoDataFileUrl(videosArr);
 		const sideVideoList = [];
-		videos.map((video) => {
+		videosArr.map((video) => {
 			videoObj = {
 				id: video.id,
 				title: video.title,
@@ -54,8 +66,9 @@ router
 	});
 
 router.get("/:id", (req, res) => {
-	const videos = readVideoData();
-	const mainVideo = videos.find((video) => video.id === req.params.id);
+	let videosArr = readVideoData();
+	videosArr = setVideoDataFileUrl(videosArr);
+	const mainVideo = videosArr.find((video) => video.id === req.params.id);
 	res.json(mainVideo);
 });
 
