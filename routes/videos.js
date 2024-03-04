@@ -124,4 +124,26 @@ router.delete("/:videoId/comments/:commentId", (req, res) => {
 	res.status(204).json(deletedComment);
 });
 
+router.put("/:videoId/likes", (req, res) => {
+	let videosArr = readVideoData();
+	videosArr
+		.filter((video) => video.id === req.params.videoId)
+		.map((video) => {
+			let videoLikes = video.likes.split(",").join(""); // remove comma thousand separators from number in string format
+			videoLikes = Number(videoLikes) + 1; // convert to number format and increment
+			video.likes = videoLikes.toLocaleString(); // convert back to string format with comma thousand separators
+		});
+	try {
+		fs.writeFileSync("./data/videos.json", JSON.stringify(videosArr));
+		console.log("Updated video data file successfully");
+	} catch (error) {
+		console.log("Failed to write updated data to file");
+	}
+	videosArr = setVideoDataFileUrl(videosArr);
+	const currentVideo = videosArr.find(
+		(video) => video.id === req.params.videoId
+	);
+	res.status(200).json(currentVideo);
+});
+
 module.exports = router;
