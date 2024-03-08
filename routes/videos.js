@@ -2,9 +2,21 @@ const express = require("express");
 const router = express.Router();
 const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
+const path = require("path");
 
 require("dotenv").config();
 const { PORT, BASE_URL } = process.env;
+
+const multer = require("multer");
+const storage = multer.diskStorage({
+	destination: (req, file, cb) => {
+		cb(null, "./public/images");
+	},
+	filename: (req, file, cb) => {
+		cb(null, `image${Date.now()}${path.extname(file.originalname)}`);
+	},
+});
+const upload = multer({ storage: storage });
 
 const readVideoData = () => {
 	try {
@@ -41,8 +53,15 @@ router
 		});
 		res.json(sideVideoList);
 	})
-	.post((req, res) => {
-		const { title, channel, image, description, duration, video } = req.body;
+	.post(upload.single("file"), (req, res) => {
+		const { title, description, channel, duration, video } = req.body;
+		const file = req.file;
+
+		// default placeholder image is shown if the user does not upload one
+		const image = file
+			? `/images/${file.filename}`
+			: `/images/defaultimage.jpeg`;
+
 		const newVideo = {
 			id: uuidv4(),
 			title,
@@ -120,7 +139,6 @@ router.delete("/:videoId/comments/:commentId", (req, res) => {
 	} catch (error) {
 		console.log("Failed to write updated data to file");
 	}
-	console.log(deletedComment); // TODO: Delete later
 	res.status(204).json(deletedComment);
 });
 

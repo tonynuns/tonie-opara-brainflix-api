@@ -12,17 +12,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-// check that POST requests are sent in with JSON headers
-app.use((req, res, next) => {
-	if (
-		req.method === "POST" &&
-		req.headers["content-type"] !== "application/json"
-	) {
-		return res.status(400).send("Post requests require JSON headers");
-	}
-	next();
-});
-
 // check that a valid API key is provided with the api request
 app.use((req, res, next) => {
 	if (req.query.api_key !== API_KEY) {
