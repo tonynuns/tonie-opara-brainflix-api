@@ -54,19 +54,17 @@ router
 		res.json(sideVideoList);
 	})
 	.post(upload.single("file"), (req, res) => {
-		const { title, description, channel, duration, video } = req.body;
+		const { title, description, channel, duration, image, video } = req.body;
 		const file = req.file;
 
 		// default placeholder image is shown if the user does not upload one
-		const image = file
-			? `/images/${file.filename}`
-			: `/images/defaultimage.jpeg`;
+		const imageUrl = file ? `/images/${file.filename}` : image;
 
 		const newVideo = {
 			id: uuidv4(),
 			title,
 			channel,
-			image,
+			image: imageUrl,
 			description,
 			views: "0",
 			likes: "0",
